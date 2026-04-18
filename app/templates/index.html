@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}
+  {% if active_conversation %}{{ active_conversation.title }} — StructAI{% else %}StructAI{% endif %}
+{% endblock %}
+
+{% block sidebar_conversations %}
+  {% for convo in conversations %}
+    <a
+      href="/conversations/{{ convo.id }}"
+      class="convo-item {% if active_conversation and active_conversation.id == convo.id %}active{% endif %}"
+      data-id="{{ convo.id }}"
+    >
+      <span class="convo-title">{{ convo.title }}</span>
+      <button class="convo-delete" data-id="{{ convo.id }}" title="Delete">✕</button>
+    </a>
+  {% else %}
+    <p class="sidebar-empty">No conversations yet.</p>
+  {% endfor %}
+{% endblock %}
+
+{% block content %}
+<div
+  class="chat-container"
+  id="chat-container"
+  data-conversation-id="{{ active_conversation.id if active_conversation else '' }}"
+>
+  <!-- Messages -->
+  <div class="messages" id="messages">
+    {% if not active_conversation %}
+      <div class="welcome">
+        <div class="welcome-icon">⚙</div>
+        <h1>Structural Engineer AI</h1>
+        <p>Ask me anything about structural calculations — wind loads, beam sizing, seismic design, footing design, and more.</p>
+        <div class="example-prompts">
+          <button class="example-btn">Calculate wind load for a 40 ft building in exposure category C with 115 mph wind speed</button>
+          <button class="example-btn">Size a steel beam for a 24 ft span carrying 3 kips/ft total load</button>
+          <button class="example-btn">What is the seismic base shear for a 500 kip building with Ss=1.2, S1=0.6, site class D?</button>
+          <button class="example-btn">Size a square footing for a 120 kip column on soil with 2000 psf bearing capacity</button>
+        </div>
+      </div>
+    {% else %}
+      {% for msg in messages %}
+        <div class="message {{ msg.role }}">
+          <div class="message-bubble">
+            {% if msg.role == "assistant" %}
+              <div class="message-content markdown-body" data-raw="{{ msg.content }}"></div>
+            {% else %}
+              <div class="message-content">{{ msg.content }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Input bar -->
+  <div class="input-bar">
+    <div class="input-wrapper">
+      <textarea
+        id="message-input"
+        placeholder="Ask a structural engineering question…"
+        rows="1"
+        autofocus
+      ></textarea>
+      <button id="send-btn" class="send-btn" title="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+    <p class="input-hint">Powered by Claude · ASCE 7-22 · AISC · ACI 318</p>
+  </div>
+</div>
+{% endblock %}
