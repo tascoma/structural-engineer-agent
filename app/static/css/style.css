@@ -140,11 +140,16 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 }
 
 /* Markdown rendering inside AI bubbles */
-.markdown-body h1, .markdown-body h2, .markdown-body h3 { margin: 12px 0 6px; font-size: 1em; font-weight: 700; }
-.markdown-body p { margin-bottom: 8px; }
-.markdown-body p:last-child { margin-bottom: 0; }
-.markdown-body ul, .markdown-body ol { padding-left: 20px; margin-bottom: 8px; }
-.markdown-body li { margin-bottom: 4px; }
+.markdown-body { white-space: normal; }
+.markdown-body > *:first-child { margin-top: 0; }
+.markdown-body > *:last-child { margin-bottom: 0; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3 { margin: 14px 0 6px; font-size: 1em; font-weight: 700; }
+.markdown-body p { margin: 0 0 8px; }
+.markdown-body ul, .markdown-body ol { padding-left: 22px; margin: 0 0 8px; }
+.markdown-body li { margin-bottom: 2px; }
+.markdown-body li > p { margin: 0 0 4px; }
+.markdown-body li > p:last-child { margin-bottom: 0; }
+.markdown-body li + li { margin-top: 2px; }
 .markdown-body code {
   background: rgba(255,255,255,0.07);
   border-radius: 4px;
