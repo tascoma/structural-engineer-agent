@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -11,6 +12,8 @@ from .agents import run_agent
 from .database import get_db
 from .models import Conversation, Message
 from .schemas import ChatResponse, ConversationDetail, ConversationSummary, MessageIn, MessageOut
+
+logger = logging.getLogger(__name__)
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
@@ -54,6 +57,7 @@ def new_conversation(db: Session = Depends(get_db)):
     db.add(convo)
     db.commit()
     db.refresh(convo)
+    logger.info("conversation created id=%s", convo.id)
     return RedirectResponse(url=f"/conversations/{convo.id}", status_code=303)
 
 
@@ -78,9 +82,11 @@ def get_conversation(conversation_id: int, request: Request, db: Session = Depen
 async def send_message(conversation_id: int, body: MessageIn, db: Session = Depends(get_db)):
     convo = db.query(Conversation).filter(Conversation.id == conversation_id).first()
     if not convo:
+        logger.warning("send_message: conversation %s not found", conversation_id)
         raise HTTPException(status_code=404, detail="Conversation not found")
 
     history = _build_history(convo.messages)
+    logger.info("send_message: conversation_id=%s prior_messages=%d", conversation_id, len(history))
 
     ai_response = await run_agent(body.content, history)
 
@@ -110,3 +116,4 @@ def delete_conversation(conversation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Conversation not found")
     db.delete(convo)
     db.commit()
+    logger.info("conversation deleted id=%s", conversation_id)

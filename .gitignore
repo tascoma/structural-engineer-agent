@@ -13,3 +13,8 @@ wheels/
 # Database files
 *.db
 *.sqlite
+
+# Log files
+logs/*
+!logs/.gitkeep
+*.log

@@ -1,18 +1,19 @@
+import logging
 import math
-import os
 from typing import NamedTuple
 
-from dotenv import load_dotenv
 from pydantic_ai import Agent
 from pydantic_ai.models.anthropic import AnthropicModel
 from pydantic_ai.providers.anthropic import AnthropicProvider
 from pydantic_ai.messages import ModelMessage
 
-load_dotenv()
+from .core.config import settings
+
+logger = logging.getLogger(__name__)
 
 model = AnthropicModel(
-    "claude-sonnet-4-6",
-    provider=AnthropicProvider(api_key=os.getenv("ANTHROPIC_API_KEY")),
+    settings.anthropic_model,
+    provider=AnthropicProvider(api_key=settings.anthropic_api_key),
 )
 
 agent = Agent(
@@ -274,5 +275,11 @@ def calculate_footing(
 
 async def run_agent(user_message: str, history: list[ModelMessage]) -> str:
     """Thin wrapper around ``agent.run`` — exists as a patch point for tests."""
-    result = await agent.run(user_message, message_history=history)
+    logger.info("agent.run: message_len=%d history_len=%d", len(user_message), len(history))
+    try:
+        result = await agent.run(user_message, message_history=history)
+    except Exception:
+        logger.exception("agent.run failed")
+        raise
+    logger.info("agent.run: response_len=%d", len(result.output))
     return result.output
